@@ -2,6 +2,7 @@
 // You can write your code in this editor
 
 
+/*
 if(identificador==1){
 	// Evento Draw GUI
 	var _largura = 200; // Largura da barra
@@ -18,7 +19,6 @@ if(identificador==1){
 	// Desenhar a barra
 	draw_healthbar(_x1, _y1, _x2, _y2, saude, c_black, c_red, c_lime, 0, true, true);
 }
-
-
+*/
 
 

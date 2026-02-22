@@ -5,7 +5,12 @@
 
 nome = "inimigo"
 
-vida_max = 30;
+identificador = 0
+
+criou_espirito = false
+espirito = noone;
+
+vida_max = 1;
 vida = vida_max;
 dano = 0;
 
@@ -279,6 +284,10 @@ estado_persegue = {
 			return;
 		}
 		
+		if(instance_exists(obj_player_espirito) && !dono.criou_espirito){
+			dono.define_estado(dono.estado_medita)
+		}
+		
 		
 		var detectado = dono.checa_area(dono.area_visao, obj_entidade);
 		dono.alvo = detectado;
@@ -452,6 +461,34 @@ estado_morre = {
 	
 }
 
+
+cria_espirito = function() {
+	espirito = instance_create_layer(x, y, "Instances", obj_inimigo_espirito)
+}
+
+estado_medita = {
+	dono: id,
+	
+	inicio: function() {
+		dono.nome_estado = "medita";
+		dono.troca_sprite(spr_player_idle);
+		if (!instance_exists(dono.espirito) && !dono.criou_espirito) {
+			dono.cria_espirito()
+		}
+	},
+	
+	atualiza: function() {
+		if (!instance_exists(dono.espirito)) {
+			dono.define_estado(dono.estado_parado);
+        }
+	},
+	
+	fim: function() {
+		dono.cooldown_medita = 100;
+		dono.criou_espirito = true;
+	}
+	
+}
 
 
 #endregion

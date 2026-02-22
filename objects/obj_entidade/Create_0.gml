@@ -8,8 +8,10 @@ nome = "player"
 
 identificador = 0
 
+espirito = noone;
+
 // vida
-vida_max = 100
+vida_max = 1
 vida = vida_max
 
 // fisica
@@ -28,11 +30,15 @@ buffer_max = 10;
 
 zonzo = 0;
 
+cooldown_medita = 0;
+
 // inputs
 inputs = {
 	dir_x: 0,
 	pula: false,
 	ataque1: false,
+	previsao: false,
+	fim_previsao: false,
 }
 
 // coyote time
@@ -65,7 +71,9 @@ pega_input = function() {
 	return {
 		dir_x: keyboard_check(ord("D")) - keyboard_check(ord("A")),
 		pula: keyboard_check_pressed(vk_space),
-		ataque1: keyboard_check_pressed(ord("F"))
+		ataque1: keyboard_check_pressed(ord("K")),
+		previsao: keyboard_check(vk_shift),
+		fim_previsao: keyboard_check(vk_control)
 	}
 }
 
@@ -211,6 +219,14 @@ estado_parado = {
 			dono.define_estado(dono.estado_ataque);
 			return;
 		}
+		if(dono.inputs.previsao && (dono.identificador!=2) && (dono.cooldown_medita<=0)) {
+			dono.define_estado(dono.estado_medita);
+			return;
+		}
+		if(dono.inputs.fim_previsao && dono.identificador==2) {
+			instance_destroy(dono)
+			return;
+		}
 	},
 };
 
@@ -241,6 +257,10 @@ estado_move = {
 			dono.define_estado(dono.estado_ataque);
 			return;
 		}
+		if(dono.inputs.fim_previsao && dono.identificador==2) {
+			instance_destroy(dono)
+			return;
+		}
 	},
 }
 
@@ -265,6 +285,10 @@ estado_cai = {
 			dono.define_estado(dono.estado_parado);
 			return;
 		}
+		if(dono.inputs.fim_previsao && dono.identificador==2) {
+			instance_destroy(dono)
+			return;
+		}
 	},
 }
 
@@ -281,6 +305,10 @@ estado_pulo = {
 		dono.movimento();
 		if(dono.velv >= 0) {
 			dono.define_estado(dono.estado_cai);
+			return;
+		}
+		if(dono.inputs.fim_previsao && dono.identificador==2) {
+			instance_destroy(dono)
 			return;
 		}
 	},
@@ -336,6 +364,11 @@ estado_ataque = {
             dono.define_estado(dono.estado_parado);
 			return
         }
+		
+		if(dono.inputs.fim_previsao && dono.identificador==2) {
+			instance_destroy(dono)
+			return;
+		}
     },
 		
 	fim: function() {
@@ -360,6 +393,11 @@ estado_dano = {
 		if (dono.acabou_animacao()) {
 			dono.define_estado(dono.estado_parado);
         }
+		
+		if(dono.inputs.fim_previsao && dono.identificador==2) {
+			instance_destroy(dono)
+			return;
+		}
 	},
 	
 	fim: function() {
@@ -383,6 +421,34 @@ estado_zonzo = {
 	},
 	
 }
+
+cria_espirito = function() {
+	espirito = instance_create_layer(x, y, "Instances", obj_player_espirito)
+}
+
+estado_medita = {
+	dono: id,
+	
+	inicio: function() {
+		dono.nome_estado = "medita";
+		dono.troca_sprite(spr_player_idle);
+		if (!instance_exists(dono.espirito)) {
+			dono.cria_espirito()
+		}
+	},
+	
+	atualiza: function() {
+		if (!instance_exists(dono.espirito)) {
+			dono.define_estado(dono.estado_parado);
+        }
+	},
+	
+	fim: function() {
+		dono.cooldown_medita = 100;
+	}
+	
+}
+
 
 #endregion
 
